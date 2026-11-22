@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewProps, Platform } from "react-native";
+import { View, ViewProps, Platform, DimensionValue } from "react-native";
 
 interface Props extends ViewProps {
   children: React.ReactNode;
@@ -7,7 +7,7 @@ interface Props extends ViewProps {
   className?: string;
 }
 
-const MAX_WIDTHS = {
+const MAX_WIDTHS: Record<"sm" | "md" | "lg" | "xl" | "full", DimensionValue> = {
   sm: 480,   // Auth cards
   md: 680,   // Single column forms/detail
   lg: 960,   // Appointments & standard dashboards
@@ -32,7 +32,7 @@ export function ResponsiveContainer({
           width: "100%",
           flex: 1,
           alignSelf: "center",
-          maxWidth: isWeb ? maxW : "100%",
+          maxWidth: isWeb ? maxW : ("100%" as DimensionValue),
         },
         style,
       ]}

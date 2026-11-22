@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "../store/authStore";
+import { usePWAInstall } from "../hooks/usePWAInstall";
 
 interface Props {
   title?: string;
@@ -12,6 +13,7 @@ interface Props {
 export function AppHeader({ title, subtitle, showBack = false }: Props) {
   const router = useRouter();
   const { name, role, logout } = useAuthStore();
+  const { isInstalled, isInstallable, installApp } = usePWAInstall();
 
   const handleLogout = async () => {
     await logout();
@@ -87,6 +89,16 @@ export function AppHeader({ title, subtitle, showBack = false }: Props) {
               {name || "User"}
             </Text>
           </View>
+
+          {/* PWA Install Button */}
+          {!isInstalled && isInstallable && (
+            <TouchableOpacity
+              onPress={installApp}
+              className="flex-row items-center bg-blue-50 border border-blue-200 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition"
+            >
+              <Text className="text-blue-700 text-xs font-bold">📲 Install App</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Logout */}
           <TouchableOpacity
