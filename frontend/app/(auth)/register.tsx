@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { authService } from "../../services/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ResponsiveContainer } from "../../components/ResponsiveContainer";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -22,97 +23,149 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!form.name || !form.email || !form.password) {
+    if (!form.name.trim() || !form.email.trim() || !form.password.trim()) {
       Alert.alert("Validation", "All fields are required.");
+      return;
+    }
+    if (form.password.length < 6) {
+      Alert.alert("Validation", "Password must be at least 6 characters.");
       return;
     }
     setLoading(true);
     try {
       await authService.register(form);
-      Alert.alert("Success", "Account created! Please log in.", [
-        { text: "OK", onPress: () => router.replace("/(auth)/login") },
+      Alert.alert("Account Created", "Registration successful! You can now sign in.", [
+        { text: "Sign In Now", onPress: () => router.replace("/(auth)/login") },
       ]);
     } catch (e: any) {
-      Alert.alert("Error", e.message);
+      Alert.alert("Registration Error", e.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-surface">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-        <View className="flex-1 justify-center px-6 py-8">
-          <Text className="text-2xl font-bold text-gray-900 mb-6">Create Account</Text>
+    <SafeAreaView className="flex-1 bg-slate-50">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        className="px-4 py-8"
+      >
+        <ResponsiveContainer maxWidth="sm">
+          {/* Header */}
+          <View className="items-center mb-6">
+            <View className="w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center mb-2 shadow-md">
+              <Text className="text-2xl">🏥</Text>
+            </View>
+            <Text className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Create an Account
+            </Text>
+            <Text className="text-slate-500 text-xs mt-1">
+              Join CrestCare Hospital Scheduling Platform
+            </Text>
+          </View>
 
-          <View className="bg-white rounded-2xl p-6 shadow-sm">
-            {/* Name */}
-            <Text className="text-sm text-gray-600 mb-1 font-medium">Full Name</Text>
-            <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 mb-4 bg-gray-50"
-              placeholder="Dr. John Smith"
-              value={form.name}
-              onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
-            />
-
-            {/* Email */}
-            <Text className="text-sm text-gray-600 mb-1 font-medium">Email</Text>
-            <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 mb-4 bg-gray-50"
-              placeholder="you@example.com"
-              value={form.email}
-              onChangeText={(v) => setForm((f) => ({ ...f, email: v }))}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            {/* Password */}
-            <Text className="text-sm text-gray-600 mb-1 font-medium">Password</Text>
-            <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 mb-4 bg-gray-50"
-              placeholder="Min 6 characters"
-              value={form.password}
-              onChangeText={(v) => setForm((f) => ({ ...f, password: v }))}
-              secureTextEntry
-            />
-
-            {/* Role */}
-            <Text className="text-sm text-gray-600 mb-2 font-medium">I am a…</Text>
-            <View className="flex-row gap-3 mb-6">
-              {(["patient", "doctor"] as const).map((r) => (
-                <TouchableOpacity
-                  key={r}
-                  onPress={() => setForm((f) => ({ ...f, role: r }))}
-                  className={`flex-1 py-3 rounded-xl border items-center ${
-                    form.role === r
-                      ? "bg-primary border-primary"
-                      : "bg-gray-50 border-gray-200"
-                  }`}
-                >
-                  <Text className={`font-semibold capitalize ${form.role === r ? "text-white" : "text-gray-700"}`}>
-                    {r === "patient" ? "🧑 Patient" : "👨‍⚕️ Doctor"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          {/* Form Card */}
+          <View className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80">
+            {/* Role Switcher */}
+            <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Select Your Role
+            </Text>
+            <View className="flex-row gap-3 mb-5">
+              {(["patient", "doctor"] as const).map((r) => {
+                const isSelected = form.role === r;
+                return (
+                  <TouchableOpacity
+                    key={r}
+                    onPress={() => setForm((f) => ({ ...f, role: r }))}
+                    className={`flex-1 p-3.5 rounded-2xl border transition items-center ${
+                      isSelected
+                        ? "bg-blue-600 border-blue-600 shadow-sm"
+                        : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <Text className="text-xl mb-1">
+                      {r === "patient" ? "🧑‍💼" : "👨‍⚕️"}
+                    </Text>
+                    <Text
+                      className={`text-xs font-bold capitalize ${
+                        isSelected ? "text-white" : "text-slate-800"
+                      }`}
+                    >
+                      {r === "patient" ? "Patient" : "Doctor"}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
+            {/* Full Name */}
+            <View className="mb-4">
+              <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Full Name
+              </Text>
+              <TextInput
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-500 transition text-sm"
+                placeholder={form.role === "doctor" ? "Dr. Sarah Jenkins" : "Sarah Jenkins"}
+                placeholderTextColor="#94A3B8"
+                value={form.name}
+                onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
+              />
+            </View>
+
+            {/* Email */}
+            <View className="mb-4">
+              <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Email Address
+              </Text>
+              <TextInput
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-500 transition text-sm"
+                placeholder="sarah@example.com"
+                placeholderTextColor="#94A3B8"
+                value={form.email}
+                onChangeText={(v) => setForm((f) => ({ ...f, email: v }))}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            {/* Password */}
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Password
+              </Text>
+              <TextInput
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-500 transition text-sm"
+                placeholder="At least 6 characters"
+                placeholderTextColor="#94A3B8"
+                value={form.password}
+                onChangeText={(v) => setForm((f) => ({ ...f, password: v }))}
+                secureTextEntry
+              />
+            </View>
+
+            {/* Submit */}
             <TouchableOpacity
               onPress={handleRegister}
               disabled={loading}
-              className={`bg-primary rounded-xl py-4 items-center ${loading ? "opacity-60" : ""}`}
+              className={`w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl py-3.5 items-center justify-center shadow-sm transition ${
+                loading ? "opacity-60" : ""
+              }`}
             >
-              <Text className="text-white font-semibold text-base">
-                {loading ? "Creating account…" : "Register"}
+              <Text className="text-white font-bold text-base">
+                {loading ? "Registering…" : "Complete Registration"}
               </Text>
             </TouchableOpacity>
-          </View>
 
-          <TouchableOpacity onPress={() => router.back()} className="mt-4 items-center">
-            <Text className="text-muted text-sm">
-              Already have an account? <Text className="text-primary font-semibold">Sign In</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
+            {/* Login Link */}
+            <View className="mt-5 pt-4 border-t border-slate-100 flex-row justify-center items-center">
+              <Text className="text-slate-500 text-xs">Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.back()}>
+                <Text className="text-blue-600 font-bold text-xs ml-1">Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
   );

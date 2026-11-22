@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View, Text, ScrollView, TouchableOpacity, TextInput, Alert,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,6 +16,8 @@ import {
 } from "../../../services/appointments";
 import { StatusBadge } from "../../../components/StatusBadge";
 import { LoadingSpinner } from "../../../components/LoadingSpinner";
+import { AppHeader } from "../../../components/AppHeader";
+import { ResponsiveContainer } from "../../../components/ResponsiveContainer";
 
 const NEXT_STATUS: Record<string, AppointmentStatus | null> = {
   Scheduled: "In_Progress",
@@ -20,8 +27,8 @@ const NEXT_STATUS: Record<string, AppointmentStatus | null> = {
 };
 
 const NEXT_LABEL: Record<string, string> = {
-  Scheduled: "▶ Start Consultation",
-  In_Progress: "✅ Mark Completed",
+  Scheduled: "▶ Begin Consultation (In Progress)",
+  In_Progress: "✅ Complete Consultation",
 };
 
 function fmtDateTime(iso: string) {
@@ -45,17 +52,22 @@ export default function AppointmentDetail() {
   const [saving, setSaving] = useState(false);
 
   const fetchAppt = async () => {
-    const all = await appointmentsService.mine();
-    const found = all.find((a) => a.id === id);
-    if (found) {
-      setAppt(found);
-      setNotes(found.notes ?? "");
-      setDiagnosis(found.diagnosis ?? "");
+    try {
+      const all = await appointmentsService.mine();
+      const found = all.find((a) => a.id === id);
+      if (found) {
+        setAppt(found);
+        setNotes(found.notes ?? "");
+        setDiagnosis(found.diagnosis ?? "");
+      }
+    } catch {} finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  useEffect(() => { fetchAppt(); }, [id]);
+  useEffect(() => {
+    fetchAppt();
+  }, [id]);
 
   const handleStatusChange = async () => {
     if (!appt) return;
@@ -67,7 +79,7 @@ export default function AppointmentDetail() {
       await appointmentsService.updateStatus(appt.id, nextStatus);
       await fetchAppt();
     } catch (e: any) {
-      Alert.alert("Error", e.message);
+      Alert.alert("Status Transition Error", e.message);
     } finally {
       setUpdating(false);
     }
@@ -75,107 +87,207 @@ export default function AppointmentDetail() {
 
   const handleSaveNotes = async () => {
     if (!appt || appt.status !== "Completed") return;
+    if (!diagnosis.trim()) {
+      Alert.alert("Validation", "Please provide a diagnosis before saving.");
+      return;
+    }
     setSaving(true);
     try {
       await appointmentsService.updateNotes(appt.id, notes, diagnosis);
-      Alert.alert("Saved", "Consultation notes saved successfully.");
+      Alert.alert("Records Saved", "Clinical notes & diagnosis updated successfully.");
     } catch (e: any) {
-      Alert.alert("Error", e.message);
+      Alert.alert("Save Error", e.message);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <LoadingSpinner />;
-  if (!appt) return (
-    <SafeAreaView className="flex-1 bg-surface items-center justify-center">
-      <Text className="text-muted">Appointment not found.</Text>
-    </SafeAreaView>
-  );
+  if (loading) return <LoadingSpinner message="Loading patient file…" />;
+  if (!appt) {
+    return (
+      <SafeAreaView className="flex-1 bg-slate-50 items-center justify-center p-6">
+        <Text className="text-slate-600 font-bold mb-4">Appointment not found.</Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="bg-blue-600 px-4 py-2 rounded-xl"
+        >
+          <Text className="text-white text-xs font-bold">Return to Dashboard</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   const nextStatus = NEXT_STATUS[appt.status];
 
-  return (
-    <SafeAreaView className="flex-1 bg-surface">
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <TouchableOpacity onPress={() => router.back()} className="mb-4">
-          <Text className="text-primary font-semibold">← Back to Dashboard</Text>
-        </TouchableOpacity>
+  // Steps for consultation progress
+  const steps = [
+    { label: "Scheduled", active: true },
+    { label: "In Progress", active: appt.status === "In_Progress" || appt.status === "Completed" },
+    { label: "Completed", active: appt.status === "Completed" },
+  ];
 
-        {/* Patient info */}
-        <View className="bg-white rounded-2xl p-4 shadow-sm mb-4">
-          <View className="flex-row justify-between items-start">
-            <View>
-              <Text className="text-xl font-bold text-gray-900">{appt.patient_name}</Text>
-              <Text className="text-muted text-sm mt-0.5">{fmtDateTime(appt.start_time)}</Text>
+  return (
+    <SafeAreaView className="flex-1 bg-slate-50" edges={["top", "bottom"]}>
+      <AppHeader showBack />
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 20 }}
+      >
+        <ResponsiveContainer maxWidth="md">
+          {/* Back link */}
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="flex-row items-center self-start mb-4 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm"
+          >
+            <Text className="text-blue-600 font-bold text-xs mr-1">←</Text>
+            <Text className="text-slate-700 font-semibold text-xs">Back to Dashboard</Text>
+          </TouchableOpacity>
+
+          {/* Patient Overview Card */}
+          <View className="bg-white rounded-3xl p-6 mb-5 shadow-sm border border-slate-200/80">
+            <View className="flex-row justify-between items-start mb-4">
+              <View className="flex-1 mr-3">
+                <Text className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Patient File
+                </Text>
+                <Text className="text-2xl font-black text-slate-900 mt-0.5">
+                  {appt.patient_name}
+                </Text>
+                <Text className="text-slate-500 text-xs mt-1">
+                  Scheduled: {fmtDateTime(appt.start_time)}
+                </Text>
+              </View>
+
+              <StatusBadge status={appt.status} />
             </View>
-            <StatusBadge status={appt.status} />
+
+            {appt.auto_assigned && (
+              <View className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 mb-4">
+                <Text className="text-emerald-800 text-xs font-bold">
+                  ⚡ Auto-Assigned from Priority Waitlist
+                </Text>
+                <Text className="text-emerald-700 text-xs mt-0.5">
+                  Slot was automatically allocated when another appointment was cancelled.
+                </Text>
+              </View>
+            )}
+
+            {/* Stepper progress visual */}
+            <View className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+              <Text className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Consultation Status Lifecycle
+              </Text>
+              <View className="flex-row items-center justify-between">
+                {steps.map((st, i) => (
+                  <View key={st.label} className="flex-row items-center flex-1">
+                    <View
+                      className={`w-6 h-6 rounded-full items-center justify-center ${
+                        st.active ? "bg-blue-600" : "bg-slate-300"
+                      }`}
+                    >
+                      <Text className="text-white text-[10px] font-black">{i + 1}</Text>
+                    </View>
+                    <Text
+                      className={`text-xs ml-1.5 font-bold ${
+                        st.active ? "text-slate-900" : "text-slate-400"
+                      }`}
+                    >
+                      {st.label}
+                    </Text>
+                    {i < steps.length - 1 && (
+                      <View
+                        className={`flex-1 h-[2px] mx-2 ${
+                          steps[i + 1].active ? "bg-blue-600" : "bg-slate-200"
+                        }`}
+                      />
+                    )}
+                  </View>
+                ))}
+              </View>
+            </View>
           </View>
-          {appt.auto_assigned && (
-            <View className="mt-2 bg-green-50 rounded-lg px-2 py-1 self-start">
-              <Text className="text-xs text-secondary">⚡ Auto-assigned from waitlist</Text>
+
+          {/* Action to update status */}
+          {nextStatus && (
+            <View className="bg-white rounded-3xl p-5 mb-5 shadow-sm border border-slate-200/80">
+              <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Transition Appointment Status
+              </Text>
+              <TouchableOpacity
+                onPress={handleStatusChange}
+                disabled={updating}
+                className={`bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-2xl py-4 items-center justify-center shadow-sm ${
+                  updating ? "opacity-60" : ""
+                }`}
+              >
+                <Text className="text-white font-extrabold text-sm sm:text-base">
+                  {updating ? "Updating Status…" : NEXT_LABEL[appt.status]}
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
-        </View>
 
-        {/* Status transition */}
-        {nextStatus && (
-          <TouchableOpacity
-            onPress={handleStatusChange}
-            disabled={updating}
-            className={`bg-primary rounded-2xl py-4 items-center mb-4 ${updating ? "opacity-60" : ""}`}
-          >
-            <Text className="text-white font-semibold text-base">
-              {updating ? "Updating…" : NEXT_LABEL[appt.status]}
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Notes / Diagnosis (only after Completed) */}
-        {appt.status === "Completed" && (
-          <View className="bg-white rounded-2xl p-4 shadow-sm mb-4">
-            <Text className="font-semibold text-gray-800 mb-3">📝 Consultation Notes</Text>
-
-            <Text className="text-sm text-gray-600 mb-1">Notes</Text>
-            <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 mb-4 bg-gray-50 text-gray-900"
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              placeholder="Enter consultation notes…"
-            />
-
-            <Text className="text-sm text-gray-600 mb-1">Diagnosis</Text>
-            <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3 mb-4 bg-gray-50 text-gray-900"
-              value={diagnosis}
-              onChangeText={setDiagnosis}
-              placeholder="Enter diagnosis…"
-            />
-
-            <TouchableOpacity
-              onPress={handleSaveNotes}
-              disabled={saving}
-              className={`bg-secondary rounded-xl py-3 items-center ${saving ? "opacity-60" : ""}`}
-            >
-              <Text className="text-white font-semibold">
-                {saving ? "Saving…" : "Save Notes & Diagnosis"}
+          {/* Notes & Diagnosis Editor (Available when Completed) */}
+          {appt.status === "Completed" ? (
+            <View className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 mb-6">
+              <Text className="text-base font-extrabold text-slate-900 mb-1">
+                📝 Clinical Notes & Diagnosis
               </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+              <Text className="text-slate-500 text-xs mb-4">
+                Recorded medical notes and diagnosis are accessible by the patient.
+              </Text>
 
-        {/* Existing notes (read-only display) */}
-        {appt.status !== "Completed" && (appt.notes || appt.diagnosis) && (
-          <View className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-            {appt.notes && <Text className="text-sm text-gray-600">📋 {appt.notes}</Text>}
-            {appt.diagnosis && (
-              <Text className="text-sm text-gray-600 mt-2 italic">Dx: {appt.diagnosis}</Text>
-            )}
-          </View>
-        )}
+              {/* Diagnosis Input */}
+              <View className="mb-4">
+                <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Diagnosis / Assessment *
+                </Text>
+                <TextInput
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-500 transition text-sm"
+                  value={diagnosis}
+                  onChangeText={setDiagnosis}
+                  placeholder="e.g. Mild viral rhinitis with low-grade fever"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              {/* Notes Input */}
+              <View className="mb-5">
+                <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Consultation Notes & Prescription
+                </Text>
+                <TextInput
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-500 transition text-sm"
+                  value={notes}
+                  onChangeText={setNotes}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  placeholder="Prescription details, advised lifestyle adjustments, and follow-up timeline…"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              <TouchableOpacity
+                onPress={handleSaveNotes}
+                disabled={saving}
+                className={`bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-2xl py-3.5 items-center justify-center shadow-sm ${
+                  saving ? "opacity-60" : ""
+                }`}
+              >
+                <Text className="text-white font-extrabold text-sm">
+                  {saving ? "Saving Records…" : "💾 Save Clinical Records"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="bg-slate-100 rounded-2xl p-4 border border-slate-200 items-center">
+              <Text className="text-slate-500 text-xs text-center font-medium">
+                Clinical diagnosis and prescription entry will unlock once consultation status is transitioned to <Text className="font-bold text-slate-700">Completed</Text>.
+              </Text>
+            </View>
+          )}
+        </ResponsiveContainer>
       </ScrollView>
     </SafeAreaView>
   );

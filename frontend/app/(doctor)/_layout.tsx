@@ -1,31 +1,51 @@
+import React from "react";
 import { Tabs } from "expo-router";
-import { Text } from "react-native";
+import { Text, Platform } from "react-native";
 
 export default function DoctorLayout() {
+  const isWeb = Platform.OS === "web";
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#0066CC",
-        tabBarInactiveTintColor: "#94A3B8",
-        tabBarStyle: { borderTopColor: "#F1F5F9" },
+        tabBarActiveTintColor: "#2563EB",
+        tabBarInactiveTintColor: "#64748B",
+        tabBarStyle: {
+          backgroundColor: "#FFFFFF",
+          borderTopColor: "#E2E8F0",
+          height: isWeb ? 60 : 64,
+          paddingBottom: isWeb ? 8 : 10,
+          paddingTop: 8,
+          shadowColor: "#000",
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+        },
       }}
     >
       <Tabs.Screen
         name="dashboard"
         options={{
           title: "Dashboard",
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📋</Text>,
+          tabBarIcon: ({ color }) => (
+            <Text style={{ fontSize: 18, color }}>📋</Text>
+          ),
         }}
       />
       <Tabs.Screen
         name="availability"
         options={{
-          title: "Availability",
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🗓️</Text>,
+          title: "Schedule Settings",
+          tabBarIcon: ({ color }) => (
+            <Text style={{ fontSize: 18, color }}>🗓️</Text>
+          ),
         }}
       />
-      {/* Hidden detail screen */}
+      {/* Hidden sub-route */}
       <Tabs.Screen name="appointment/[id]" options={{ href: null }} />
     </Tabs>
   );

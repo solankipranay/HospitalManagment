@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { useAuthStore } from "../../store/authStore";
 import { authService } from "../../services/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ResponsiveContainer } from "../../components/ResponsiveContainer";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Validation", "Please enter email and password.");
+      Alert.alert("Validation", "Please enter both email and password.");
       return;
     }
     setLoading(true);
@@ -36,14 +37,19 @@ export default function LoginScreen() {
         router.replace("/(patient)/home");
       }
     } catch (e: any) {
-      Alert.alert("Login Failed", e.message);
+      Alert.alert("Authentication Failed", e.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const fillDemo = (demoEmail: string) => {
+    setEmail(demoEmail);
+    setPassword("password123");
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-surface">
+    <SafeAreaView className="flex-1 bg-slate-50">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -51,71 +57,118 @@ export default function LoginScreen() {
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
+          className="px-4 py-8"
         >
-          <View className="flex-1 justify-center px-6">
-            {/* Header */}
-            <View className="items-center mb-10">
-              <View className="w-20 h-20 rounded-full bg-primary items-center justify-center mb-4">
-                <Text className="text-4xl">🏥</Text>
+          <ResponsiveContainer maxWidth="sm">
+            {/* Brand Header */}
+            <View className="items-center mb-8">
+              <View className="w-16 h-16 rounded-2xl bg-blue-600 items-center justify-center mb-3 shadow-md">
+                <Text className="text-3xl">🏥</Text>
               </View>
-              <Text className="text-3xl font-bold text-gray-900">Hospital App</Text>
-              <Text className="text-muted text-sm mt-1">CrestCode Scheduling System</Text>
+              <Text className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                Crest<Text className="text-blue-600">Care</Text>
+              </Text>
+              <Text className="text-slate-500 text-sm font-medium mt-1">
+                Hospital Scheduling & Patient Management
+              </Text>
             </View>
 
-            {/* Form */}
-            <View className="bg-white rounded-2xl p-6 shadow-sm">
-              <Text className="text-xl font-semibold text-gray-900 mb-6">Sign In</Text>
+            {/* Login Card */}
+            <View className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80">
+              <Text className="text-xl font-bold text-slate-900 mb-1">Welcome back</Text>
+              <Text className="text-slate-500 text-xs mb-6">
+                Enter your credentials to access your hospital portal.
+              </Text>
 
-              <Text className="text-sm text-gray-600 mb-1 font-medium">Email</Text>
-              <TextInput
-                className="border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-900 bg-gray-50"
-                placeholder="you@example.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-              />
+              {/* Email */}
+              <View className="mb-4">
+                <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Email Address
+                </Text>
+                <TextInput
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-500 transition text-sm"
+                  placeholder="name@hospital.com"
+                  placeholderTextColor="#94A3B8"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                />
+              </View>
 
-              <Text className="text-sm text-gray-600 mb-1 font-medium">Password</Text>
-              <TextInput
-                className="border border-gray-200 rounded-xl px-4 py-3 mb-6 text-gray-900 bg-gray-50"
-                placeholder="••••••••"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              {/* Password */}
+              <View className="mb-6">
+                <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Password
+                </Text>
+                <TextInput
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-900 bg-slate-50/50 focus:bg-white focus:border-blue-500 transition text-sm"
+                  placeholder="••••••••"
+                  placeholderTextColor="#94A3B8"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+              </View>
 
+              {/* Submit CTA */}
               <TouchableOpacity
                 onPress={handleLogin}
                 disabled={loading}
-                className={`bg-primary rounded-xl py-4 items-center ${loading ? "opacity-60" : ""}`}
+                className={`w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl py-3.5 items-center justify-center shadow-sm transition ${
+                  loading ? "opacity-60" : ""
+                }`}
               >
-                <Text className="text-white font-semibold text-base">
-                  {loading ? "Signing in…" : "Sign In"}
+                <Text className="text-white font-bold text-base">
+                  {loading ? "Authenticating…" : "Sign In to Portal"}
                 </Text>
               </TouchableOpacity>
+
+              {/* Register Link */}
+              <View className="mt-5 pt-4 border-t border-slate-100 flex-row justify-center items-center">
+                <Text className="text-slate-500 text-xs">Don't have an account? </Text>
+                <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
+                  <Text className="text-blue-600 font-bold text-xs ml-1">Create Account</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            {/* Register link */}
-            <TouchableOpacity
-              onPress={() => router.push("/(auth)/register")}
-              className="mt-4 items-center"
-            >
-              <Text className="text-muted text-sm">
-                Don't have an account?{" "}
-                <Text className="text-primary font-semibold">Register</Text>
+            {/* Quick Demo Credentials Autofill */}
+            <View className="mt-6 bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+              <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+                ⚡ 1-Click Demo Login:
               </Text>
-            </TouchableOpacity>
+              <View className="flex-row flex-wrap gap-2">
+                <TouchableOpacity
+                  onPress={() => fillDemo("dr.smith@hospital.com")}
+                  className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl px-3 py-2"
+                >
+                  <Text className="text-xs font-semibold text-blue-700">
+                    👨‍⚕️ Dr. Smith (15m)
+                  </Text>
+                </TouchableOpacity>
 
-            {/* Demo credentials */}
-            <View className="mt-6 bg-blue-50 rounded-xl p-4">
-              <Text className="text-xs font-semibold text-blue-700 mb-2">Demo Credentials</Text>
-              <Text className="text-xs text-blue-600">👨‍⚕️ Dr. Smith: dr.smith@hospital.com</Text>
-              <Text className="text-xs text-blue-600">🧑 Alice: alice@patient.com</Text>
-              <Text className="text-xs text-blue-600">🔑 Password: password123</Text>
+                <TouchableOpacity
+                  onPress={() => fillDemo("dr.patel@hospital.com")}
+                  className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl px-3 py-2"
+                >
+                  <Text className="text-xs font-semibold text-emerald-700">
+                    👨‍⚕️ Dr. Patel (45m)
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => fillDemo("alice@patient.com")}
+                  className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl px-3 py-2"
+                >
+                  <Text className="text-xs font-semibold text-indigo-700">
+                    🧑 Alice (Patient)
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </ResponsiveContainer>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
