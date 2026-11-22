@@ -79,7 +79,10 @@ async def book_appointment(
     if not doctor:
         raise HTTPException(404, "Doctor not found")
 
-    start_time = data.start_time.replace(tzinfo=None)  # store naive UTC
+    if data.start_time.tzinfo is not None:
+        start_time = data.start_time.astimezone(timezone.utc).replace(tzinfo=None)
+    else:
+        start_time = data.start_time
     end_time = start_time + timedelta(minutes=doctor["consultation_duration"])
 
     # Pre-check (fast path; unique index is the real guard)

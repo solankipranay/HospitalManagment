@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, Platform } from "react-native";
 import { Appointment, appointmentsService } from "../services/appointments";
 import { StatusBadge } from "./StatusBadge";
 
@@ -35,30 +35,43 @@ export function AppointmentCard({
   // 2-hour cancellation rule condition
   const canCancel = !isDoctor && a.status === "Scheduled" && hoursUntil >= 2;
 
+  const doCancel = async () => {
+    try {
+      const res = await appointmentsService.cancel(a.id);
+      const msg = res.notice || "Your slot has been cancelled successfully.";
+      if (Platform.OS === "web") {
+        window.alert("Appointment Cancelled: " + msg);
+      } else {
+        Alert.alert("Appointment Cancelled", msg);
+      }
+      onRefresh();
+    } catch (e: any) {
+      if (Platform.OS === "web") {
+        window.alert("Cancellation Error: " + (e.message || "Failed to cancel"));
+      } else {
+        Alert.alert("Cancellation Error", e.message);
+      }
+    }
+  };
+
   const handleCancel = () => {
-    Alert.alert(
-      "Confirm Cancellation",
-      "Are you sure you want to cancel this appointment? This slot will be auto-reallocated to any priority patient on the waitlist.",
-      [
-        { text: "Keep Appointment", style: "cancel" },
-        {
-          text: "Cancel Slot",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const res = await appointmentsService.cancel(a.id);
-              Alert.alert(
-                "Appointment Cancelled",
-                res.notice || "Your slot has been cancelled successfully."
-              );
-              onRefresh();
-            } catch (e: any) {
-              Alert.alert("Cancellation Error", e.message);
-            }
-          },
-        },
-      ]
-    );
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Are you sure you want to cancel this appointment?\n\nIf any patient is waiting on the priority waitlist, this slot will be auto-reallocated immediately."
+      );
+      if (confirmed) {
+        doCancel();
+      }
+    } else {
+      Alert.alert(
+        "Confirm Cancellation",
+        "Are you sure you want to cancel this appointment? This slot will be auto-reallocated to any priority patient on the waitlist.",
+        [
+          { text: "Keep Appointment", style: "cancel" },
+          { text: "Cancel Slot", style: "destructive", onPress: doCancel },
+        ]
+      );
+    }
   };
 
   return (

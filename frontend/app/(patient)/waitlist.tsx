@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   RefreshControl,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { waitlistService, WaitlistEntry } from "../../services/waitlist";
@@ -40,25 +41,33 @@ export default function WaitlistScreen() {
   }, []);
 
   const handleLeave = (id: string) => {
-    Alert.alert(
-      "Remove From Waitlist",
-      "Are you sure you want to withdraw your waitlist request for this doctor and date?",
-      [
-        { text: "Keep My Place", style: "cancel" },
-        {
-          text: "Remove Me",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await waitlistService.leave(id);
-              fetch();
-            } catch (e: any) {
-              Alert.alert("Error", e.message);
-            }
-          },
-        },
-      ]
-    );
+    const doLeave = async () => {
+      try {
+        await waitlistService.leave(id);
+        fetch();
+      } catch (e: any) {
+        if (Platform.OS === "web") {
+          window.alert("Error: " + e.message);
+        } else {
+          Alert.alert("Error", e.message);
+        }
+      }
+    };
+
+    if (Platform.OS === "web") {
+      if (window.confirm("Are you sure you want to withdraw your waitlist request for this doctor and date?")) {
+        doLeave();
+      }
+    } else {
+      Alert.alert(
+        "Remove From Waitlist",
+        "Are you sure you want to withdraw your waitlist request for this doctor and date?",
+        [
+          { text: "Keep My Place", style: "cancel" },
+          { text: "Remove Me", style: "destructive", onPress: doLeave },
+        ]
+      );
+    }
   };
 
   if (loading) return <LoadingSpinner message="Loading waitlist queue…" />;

@@ -22,10 +22,12 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async () => {
+    setErrorMsg("");
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Validation", "Please enter both email and password.");
+      setErrorMsg("Please enter both email and password.");
       return;
     }
     setLoading(true);
@@ -38,7 +40,7 @@ export default function LoginScreen() {
         router.replace("/(patient)/home");
       }
     } catch (e: any) {
-      Alert.alert("Authentication Failed", e.message);
+      setErrorMsg(e.message || "Invalid credentials. Please verify your email and password.");
     } finally {
       setLoading(false);
     }
@@ -79,6 +81,15 @@ export default function LoginScreen() {
               <Text className="text-slate-500 text-xs mb-6">
                 Enter your credentials to access your hospital portal.
               </Text>
+
+              {/* Inline Error Banner */}
+              {errorMsg ? (
+                <View className="mb-4 bg-rose-50 border border-rose-200 rounded-xl p-3 flex-row items-center">
+                  <Text className="text-rose-700 text-xs font-semibold flex-1">
+                    ⚠️ {errorMsg}
+                  </Text>
+                </View>
+              ) : null}
 
               {/* Email */}
               <View className="mb-4">

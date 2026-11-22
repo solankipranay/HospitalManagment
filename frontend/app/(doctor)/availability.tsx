@@ -7,6 +7,7 @@ import {
   TextInput,
   Alert,
   Switch,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { doctorsService, DayAvailability } from "../../services/doctors";
@@ -71,7 +72,11 @@ export default function AvailabilityScreen() {
   const handleSave = async () => {
     const durNum = parseInt(duration, 10);
     if (isNaN(durNum) || durNum < 5 || durNum > 180) {
-      Alert.alert("Validation", "Consultation duration must be between 5 and 180 minutes.");
+      if (Platform.OS === "web") {
+        window.alert("Validation: Consultation duration must be between 5 and 180 minutes.");
+      } else {
+        Alert.alert("Validation", "Consultation duration must be between 5 and 180 minutes.");
+      }
       return;
     }
     setSaving(true);
@@ -81,12 +86,18 @@ export default function AvailabilityScreen() {
         consultation_duration: durNum,
         availability: days.filter((d) => d.is_available),
       });
-      Alert.alert(
-        "Schedule Saved",
-        "Your weekly working schedule and consultation duration have been updated successfully."
-      );
+      const successMsg = "Schedule Saved: Your weekly working schedule and consultation duration have been updated successfully.";
+      if (Platform.OS === "web") {
+        window.alert(successMsg);
+      } else {
+        Alert.alert("Schedule Saved", successMsg);
+      }
     } catch (e: any) {
-      Alert.alert("Save Error", e.message);
+      if (Platform.OS === "web") {
+        window.alert("Save Error: " + (e.message || "Failed to update"));
+      } else {
+        Alert.alert("Save Error", e.message);
+      }
     } finally {
       setSaving(false);
     }

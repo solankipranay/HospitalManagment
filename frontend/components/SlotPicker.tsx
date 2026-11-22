@@ -65,8 +65,8 @@ export function SlotPicker({
                 isBooked
                   ? "bg-slate-100 border-slate-200 opacity-40 cursor-not-allowed"
                   : isSelected
-                  ? "bg-blue-600 border-blue-600 shadow-sm"
-                  : "bg-white border-slate-200 hover:border-blue-400 hover:bg-blue-50/40",
+                    ? "bg-blue-600 border-blue-600 shadow-sm"
+                    : "bg-white border-slate-200 hover:border-blue-400 hover:bg-blue-50/40",
               ].join(" ")}
             >
               <Text
@@ -75,8 +75,8 @@ export function SlotPicker({
                   isBooked
                     ? "text-slate-400 line-through"
                     : isSelected
-                    ? "text-white"
-                    : "text-slate-800",
+                      ? "text-white"
+                      : "text-slate-800",
                 ].join(" ")}
               >
                 {fmtSlot(slot)}

@@ -64,13 +64,22 @@ export default function BookAppointment() {
     setBooking(true);
     try {
       await appointmentsService.book(doctorId!, selectedSlot);
-      Alert.alert(
-        "Booking Confirmed! 🎉",
-        "Your appointment has been successfully scheduled. You can view or manage it in My Appointments.",
-        [{ text: "Go to Appointments", onPress: () => router.replace("/(patient)/appointments") }]
-      );
+      if (Platform.OS === "web") {
+        window.alert("Booking Confirmed! 🎉\n\nYour appointment has been successfully scheduled.");
+        router.replace("/(patient)/appointments");
+      } else {
+        Alert.alert(
+          "Booking Confirmed! 🎉",
+          "Your appointment has been successfully scheduled. You can view or manage it in My Appointments.",
+          [{ text: "Go to Appointments", onPress: () => router.replace("/(patient)/appointments") }]
+        );
+      }
     } catch (e: any) {
-      Alert.alert("Booking Conflict", e.message);
+      if (Platform.OS === "web") {
+        window.alert("Booking Conflict: " + (e.message || "Failed to book slot"));
+      } else {
+        Alert.alert("Booking Conflict", e.message);
+      }
       // Refresh slot list
       if (selectedDate) handleDateSelect({ dateString: selectedDate });
     } finally {
@@ -82,12 +91,18 @@ export default function BookAppointment() {
     setJoiningWaitlist(true);
     try {
       const res = await waitlistService.join(doctorId!, selectedDate, urgency);
-      Alert.alert(
-        "Added to Priority Waitlist! ⏳",
-        `You have been queued with ${urgency.toUpperCase()} urgency. If a patient cancels their appointment on ${selectedDate}, this slot will automatically be reassigned to you.`
-      );
+      const msg = `You have been queued with ${urgency.toUpperCase()} urgency. If a patient cancels their appointment on ${selectedDate}, this slot will automatically be reassigned to you.`;
+      if (Platform.OS === "web") {
+        window.alert("Added to Priority Waitlist! ⏳\n\n" + msg);
+      } else {
+        Alert.alert("Added to Priority Waitlist! ⏳", msg);
+      }
     } catch (e: any) {
-      Alert.alert("Waitlist Request", e.message);
+      if (Platform.OS === "web") {
+        window.alert("Waitlist Request: " + (e.message || "Failed to join waitlist"));
+      } else {
+        Alert.alert("Waitlist Request", e.message);
+      }
     } finally {
       setJoiningWaitlist(false);
     }
@@ -177,12 +192,12 @@ export default function BookAppointment() {
                   markedDates={
                     selectedDate
                       ? {
-                          [selectedDate]: {
-                            selected: true,
-                            selectedColor: "#2563EB",
-                            selectedTextColor: "#FFFFFF",
-                          },
-                        }
+                        [selectedDate]: {
+                          selected: true,
+                          selectedColor: "#2563EB",
+                          selectedTextColor: "#FFFFFF",
+                        },
+                      }
                       : {}
                   }
                   minDate={new Date().toISOString().split("T")[0]}
@@ -265,9 +280,8 @@ export default function BookAppointment() {
                       <TouchableOpacity
                         onPress={handleBook}
                         disabled={booking}
-                        className={`w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-2xl py-4 items-center justify-center shadow-md transition ${
-                          booking ? "opacity-60" : ""
-                        }`}
+                        className={`w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-2xl py-4 items-center justify-center shadow-md transition ${booking ? "opacity-60" : ""
+                          }`}
                       >
                         <Text className="text-white font-extrabold text-base">
                           {booking ? "Locking & Confirming Slot…" : "Confirm Appointment"}

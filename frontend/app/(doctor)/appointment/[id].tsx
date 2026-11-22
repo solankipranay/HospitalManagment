@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -79,7 +80,11 @@ export default function AppointmentDetail() {
       await appointmentsService.updateStatus(appt.id, nextStatus);
       await fetchAppt();
     } catch (e: any) {
-      Alert.alert("Status Transition Error", e.message);
+      if (Platform.OS === "web") {
+        window.alert("Status Transition Error: " + (e.message || "Failed"));
+      } else {
+        Alert.alert("Status Transition Error", e.message);
+      }
     } finally {
       setUpdating(false);
     }
@@ -88,15 +93,27 @@ export default function AppointmentDetail() {
   const handleSaveNotes = async () => {
     if (!appt || appt.status !== "Completed") return;
     if (!diagnosis.trim()) {
-      Alert.alert("Validation", "Please provide a diagnosis before saving.");
+      if (Platform.OS === "web") {
+        window.alert("Validation: Please provide a clinical diagnosis before saving.");
+      } else {
+        Alert.alert("Validation", "Please provide a diagnosis before saving.");
+      }
       return;
     }
     setSaving(true);
     try {
       await appointmentsService.updateNotes(appt.id, notes, diagnosis);
-      Alert.alert("Records Saved", "Clinical notes & diagnosis updated successfully.");
+      if (Platform.OS === "web") {
+        window.alert("Records Saved: Clinical notes & diagnosis updated successfully.");
+      } else {
+        Alert.alert("Records Saved", "Clinical notes & diagnosis updated successfully.");
+      }
     } catch (e: any) {
-      Alert.alert("Save Error", e.message);
+      if (Platform.OS === "web") {
+        window.alert("Save Error: " + (e.message || "Failed to save"));
+      } else {
+        Alert.alert("Save Error", e.message);
+      }
     } finally {
       setSaving(false);
     }

@@ -4,17 +4,18 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   ScrollView,
   Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "../../services/auth";
+import { useAuthStore } from "../../store/authStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ResponsiveContainer } from "../../components/ResponsiveContainer";
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -22,24 +23,53 @@ export default function RegisterScreen() {
     role: "patient" as "doctor" | "patient",
   });
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const handleRegister = async () => {
+    setErrorMsg("");
+    setSuccessMsg("");
+
     if (!form.name.trim() || !form.email.trim() || !form.password.trim()) {
-      Alert.alert("Validation", "All fields are required.");
+      setErrorMsg("All fields are required.");
       return;
     }
     if (form.password.length < 6) {
-      Alert.alert("Validation", "Password must be at least 6 characters.");
+      setErrorMsg("Password must be at least 6 characters.");
       return;
     }
+
     setLoading(true);
     try {
+      // 1. Register user
       await authService.register(form);
-      Alert.alert("Account Created", "Registration successful! You can now sign in.", [
-        { text: "Sign In Now", onPress: () => router.replace("/(auth)/login") },
-      ]);
+      setSuccessMsg("Account created! Redirecting to your portal…");
+
+      // 2. Auto-login for instant seamless onboarding
+      try {
+        const loginRes = await authService.login({
+          email: form.email.trim(),
+          password: form.password,
+        });
+        await setAuth(
+          loginRes.access_token,
+          loginRes.role,
+          loginRes.user_id,
+          loginRes.name
+        );
+
+        // Redirect directly to doctor or patient dashboard
+        if (loginRes.role === "doctor") {
+          router.replace("/(doctor)/dashboard");
+        } else {
+          router.replace("/(patient)/home");
+        }
+      } catch {
+        // Fallback: Navigate straight to sign in screen
+        router.replace("/(auth)/login");
+      }
     } catch (e: any) {
-      Alert.alert("Registration Error", e.message);
+      setErrorMsg(e.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +102,32 @@ export default function RegisterScreen() {
 
           {/* Form Card */}
           <View className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80">
+            {/* Inline Error Banner */}
+            {errorMsg ? (
+              <View className="mb-4 bg-rose-50 border border-rose-200 rounded-xl p-3 flex-row items-center justify-between">
+                <Text className="text-rose-700 text-xs font-semibold flex-1">
+                  ⚠️ {errorMsg}
+                </Text>
+                {errorMsg.toLowerCase().includes("already registered") && (
+                  <TouchableOpacity
+                    onPress={() => router.replace("/(auth)/login")}
+                    className="ml-2 bg-rose-600 px-2.5 py-1 rounded-lg"
+                  >
+                    <Text className="text-white text-[11px] font-bold">Sign In</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ) : null}
+
+            {/* Inline Success Banner */}
+            {successMsg ? (
+              <View className="mb-4 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                <Text className="text-emerald-700 text-xs font-semibold">
+                  ✅ {successMsg}
+                </Text>
+              </View>
+            ) : null}
+
             {/* Role Switcher */}
             <Text className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Select Your Role
@@ -114,7 +170,10 @@ export default function RegisterScreen() {
                 placeholder={form.role === "doctor" ? "Dr. Sarah Jenkins" : "Sarah Jenkins"}
                 placeholderTextColor="#94A3B8"
                 value={form.name}
-                onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
+                onChangeText={(v) => {
+                  setErrorMsg("");
+                  setForm((f) => ({ ...f, name: v }));
+                }}
               />
             </View>
 
@@ -128,7 +187,10 @@ export default function RegisterScreen() {
                 placeholder="sarah@example.com"
                 placeholderTextColor="#94A3B8"
                 value={form.email}
-                onChangeText={(v) => setForm((f) => ({ ...f, email: v }))}
+                onChangeText={(v) => {
+                  setErrorMsg("");
+                  setForm((f) => ({ ...f, email: v }));
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -144,7 +206,10 @@ export default function RegisterScreen() {
                 placeholder="At least 6 characters"
                 placeholderTextColor="#94A3B8"
                 value={form.password}
-                onChangeText={(v) => setForm((f) => ({ ...f, password: v }))}
+                onChangeText={(v) => {
+                  setErrorMsg("");
+                  setForm((f) => ({ ...f, password: v }));
+                }}
                 secureTextEntry
               />
             </View>
@@ -158,14 +223,14 @@ export default function RegisterScreen() {
               }`}
             >
               <Text className="text-white font-bold text-base">
-                {loading ? "Registering…" : "Complete Registration"}
+                {loading ? "Creating Account…" : "Complete Registration"}
               </Text>
             </TouchableOpacity>
 
             {/* Login Link */}
             <View className="mt-5 pt-4 border-t border-slate-100 flex-row justify-center items-center">
               <Text className="text-slate-500 text-xs">Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.back()}>
+              <TouchableOpacity onPress={() => router.replace("/(auth)/login")}>
                 <Text className="text-blue-600 font-bold text-xs ml-1">Sign In</Text>
               </TouchableOpacity>
             </View>
