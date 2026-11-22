@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Hospital Scheduling System",
+    title="CarePulse - Hospital Scheduling System",
     description=(
         "CrestCode Internship Assignment\n\n"
         "Features: JWT Auth · Dynamic Slot Engine · "

@@ -43,11 +43,6 @@ export default function LoginScreen() {
     }
   };
 
-  const fillDemo = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword("password123");
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <KeyboardAvoidingView
@@ -66,7 +61,7 @@ export default function LoginScreen() {
                 <Text className="text-3xl">🏥</Text>
               </View>
               <Text className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                Crest<Text className="text-blue-600">Care</Text>
+                Care<Text className="text-blue-600">Pulse</Text>
               </Text>
               <Text className="text-slate-500 text-sm font-medium mt-1">
                 Hospital Scheduling & Patient Management
@@ -130,41 +125,6 @@ export default function LoginScreen() {
                 <Text className="text-slate-500 text-xs">Don't have an account? </Text>
                 <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
                   <Text className="text-blue-600 font-bold text-xs ml-1">Create Account</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Quick Demo Credentials Autofill */}
-            <View className="mt-6 bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
-              <Text className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                ⚡ 1-Click Demo Login:
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                <TouchableOpacity
-                  onPress={() => fillDemo("dr.smith@hospital.com")}
-                  className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl px-3 py-2"
-                >
-                  <Text className="text-xs font-semibold text-blue-700">
-                    👨‍⚕️ Dr. Smith (15m)
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => fillDemo("dr.patel@hospital.com")}
-                  className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl px-3 py-2"
-                >
-                  <Text className="text-xs font-semibold text-emerald-700">
-                    👨‍⚕️ Dr. Patel (45m)
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => fillDemo("alice@patient.com")}
-                  className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl px-3 py-2"
-                >
-                  <Text className="text-xs font-semibold text-indigo-700">
-                    🧑 Alice (Patient)
-                  </Text>
                 </TouchableOpacity>
               </View>
             </View>

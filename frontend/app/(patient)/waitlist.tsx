@@ -15,9 +15,9 @@ import { ResponsiveContainer } from "../../components/ResponsiveContainer";
 
 const URGENCY_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
   critical: { bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200", label: "Critical Priority (Level 4)" },
-  high:     { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200", label: "High Priority (Level 3)" },
-  medium:   { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", label: "Medium Priority (Level 2)" },
-  low:      { bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200", label: "Standard Priority (Level 1)" },
+  high: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200", label: "High Priority (Level 3)" },
+  medium: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", label: "Medium Priority (Level 2)" },
+  low: { bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200", label: "Standard Priority (Level 1)" },
 };
 
 export default function WaitlistScreen() {
@@ -29,7 +29,7 @@ export default function WaitlistScreen() {
     try {
       const data = await waitlistService.mine();
       setEntries(data);
-    } catch {} finally {
+    } catch { } finally {
       setLoading(false);
       setRefreshing(false);
     }

@@ -61,7 +61,7 @@ export default function RegisterScreen() {
               Create an Account
             </Text>
             <Text className="text-slate-500 text-xs mt-1">
-              Join CrestCare Hospital Scheduling Platform
+              Join CarePulse Hospital Scheduling Platform
             </Text>
           </View>
 

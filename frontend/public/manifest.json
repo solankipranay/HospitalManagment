@@ -1,6 +1,6 @@
 {
-  "name": "Hospital Scheduling System",
-  "short_name": "HospitalApp",
+  "name": "CarePulse - Hospital Scheduling System",
+  "short_name": "CarePulse",
   "description": "Book and manage hospital appointments — CrestCode Assignment",
   "start_url": "/",
   "display": "standalone",

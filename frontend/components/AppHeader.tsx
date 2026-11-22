@@ -46,7 +46,7 @@ export function AppHeader({ title, subtitle, showBack = false }: Props) {
             </View>
             <View>
               <Text className="text-slate-900 font-extrabold text-lg tracking-tight">
-                Crest<Text className="text-blue-600">Care</Text>
+                Care<Text className="text-blue-600">Pulse</Text>
               </Text>
               <Text className="text-slate-400 text-xs font-medium">
                 Hospital Scheduling System

@@ -1,4 +1,4 @@
-# 🏥 Hospital Scheduling & Management System
+# 🏥 CarePulse — Hospital Scheduling & Management System
 
 > **CrestCode Internship Assignment** — 48-hour take-home project  
 > **Role:** Software Engineering Intern | **Stack:** FastAPI + MongoDB + React Native (Expo) PWA
