@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Hospital App",
+    "slug": "hospital-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0066CC"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.crestcode.hospitalapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0066CC"
+      },
+      "package": "com.crestcode.hospitalapp"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "meta": {
+        "themeColor": "#0066CC",
+        "viewport": "width=device-width, initial-scale=1, maximum-scale=1"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "scheme": "hospitalapp"
+  }
+}
