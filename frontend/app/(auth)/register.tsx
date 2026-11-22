@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { authService } from "../../services/auth";
@@ -54,8 +55,12 @@ export default function RegisterScreen() {
         <ResponsiveContainer maxWidth="sm">
           {/* Header */}
           <View className="items-center mb-6">
-            <View className="w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center mb-2 shadow-md">
-              <Text className="text-2xl">🏥</Text>
+            <View className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 items-center justify-center mb-2 shadow-sm p-2.5">
+              <Image
+                source={require("../../assets/hospital-logo.png")}
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="contain"
+              />
             </View>
             <Text className="text-2xl font-extrabold text-slate-900 tracking-tight">
               Create an Account

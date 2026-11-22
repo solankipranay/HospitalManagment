@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "../../store/authStore";
@@ -57,8 +58,12 @@ export default function LoginScreen() {
           <ResponsiveContainer maxWidth="sm">
             {/* Brand Header */}
             <View className="items-center mb-8">
-              <View className="w-16 h-16 rounded-2xl bg-blue-600 items-center justify-center mb-3 shadow-md">
-                <Text className="text-3xl">🏥</Text>
+              <View className="w-20 h-20 rounded-3xl bg-blue-50 border border-blue-100 items-center justify-center mb-3 shadow-sm p-3">
+                <Image
+                  source={require("../../assets/hospital-logo.png")}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="contain"
+                />
               </View>
               <Text className="text-3xl font-extrabold text-slate-900 tracking-tight">
                 Care<Text className="text-blue-600">Pulse</Text>

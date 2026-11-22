@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "../store/authStore";
 
@@ -41,8 +41,12 @@ export function AppHeader({ title, subtitle, showBack = false }: Props) {
           )}
 
           <View className="flex-row items-center">
-            <View className="w-10 h-10 rounded-xl bg-blue-600 items-center justify-center shadow-sm mr-3">
-              <Text className="text-white text-lg font-black">🏥</Text>
+            <View className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center shadow-sm mr-3 p-1">
+              <Image
+                source={require("../assets/hospital-logo.png")}
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="contain"
+              />
             </View>
             <View>
               <Text className="text-slate-900 font-extrabold text-lg tracking-tight">
