@@ -19,8 +19,10 @@ from datetime import date, datetime, timedelta, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 from passlib.context import CryptContext
 
-MONGODB_URL = "mongodb://localhost:27017"
-DB_NAME = "hospital_db"
+from app.config import settings
+
+MONGODB_URL = settings.MONGODB_URL
+DB_NAME = settings.DB_NAME
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

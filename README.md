@@ -1,11 +1,11 @@
-# 🏥 CarePulse — Hospital Scheduling & Management System
+# CarePulse — Hospital Scheduling & Management System
 
 > **CrestCode Internship Assignment** — 48-hour take-home project  
 > **Role:** Software Engineering Intern | **Stack:** FastAPI + MongoDB + React Native (Expo) PWA
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.11+
@@ -17,7 +17,6 @@
 cd backend
 python -m venv venv
 venv\Scripts\activate          # Windows
-# source venv/bin/activate    # Mac/Linux
 pip install -r requirements.txt
 ```
 
@@ -51,6 +50,39 @@ npx expo start --web          # PWA dev mode
 # Or build for production:
 npx expo export -p web        # Outputs to dist/
 ```
+
+---
+
+## 🚀 Deployment Guide
+
+### 1. Backend Deployment (Render)
+1. In [Render Dashboard](https://dashboard.render.com), click **New +** ➔ **Web Service** (or **Blueprint** using `render.yaml`).
+2. Connect your GitHub repository (`HospitalManagment`).
+3. Set the following settings:
+   - **Root Directory**: `backend` (or leave root if using `render.yaml`)
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add **Environment Variables**:
+   - `MONGODB_URL`: `mongodb+srv://<user>:<password>@cluster0.ikuyfkx.mongodb.net/hospital_db?retryWrites=true&w=majority`
+   - `DB_NAME`: `hospital_db`
+   - `SECRET_KEY`: `your-strong-production-secret-key`
+   - `ALGORITHM`: `HS256`
+   - `ACCESS_TOKEN_EXPIRE_MINUTES`: `1440`
+5. Click **Deploy**. Your backend will be live at `https://<your-app>.onrender.com`.
+
+### 2. Frontend Deployment (Vercel)
+1. In [Vercel Dashboard](https://vercel.com/dashboard), click **Add New...** ➔ **Project**.
+2. Select your GitHub repository.
+3. In Project Settings:
+   - **Root Directory**: `frontend`
+   - **Framework Preset**: `Other`
+   - **Build Command**: `npm run build:web`
+   - **Output Directory**: `dist`
+4. Add **Environment Variables**:
+   - `EXPO_PUBLIC_API_URL`: `https://<your-app>.onrender.com`
+   - `EXPO_PUBLIC_WS_URL`: `wss://<your-app>.onrender.com`
+5. Click **Deploy**. Your PWA is live with standalone installation support!
 
 ---
 
@@ -108,9 +140,9 @@ npx expo export -p web        # Outputs to dist/
 
 ---
 
-## 🗄️ Database Choice: MongoDB
+## Database Choice: MongoDB
 
-### ✅ Why MongoDB (over PostgreSQL / MySQL)
+###  Why MongoDB (over PostgreSQL / MySQL)
 
 | Reason | Detail |
 |---|---|
@@ -120,31 +152,27 @@ npx expo export -p web        # Outputs to dist/
 | **Fast Document Reads** | Fetching a doctor's full profile (including their entire availability config) = one document fetch. No JOIN queries. |
 | **Schema Flexibility** | As requirements evolve (add more metadata), no migration files needed — just add fields to documents. |
 
-### ❌ Why Not PostgreSQL
+###  Why Not PostgreSQL
 - Would require 5+ normalized tables (users, doctors, patients, appointments, availability, breaks)
 - Slot generation would need complex JOIN queries
 - ORM (SQLAlchemy) adds boilerplate compared to Motor's native async
 - Schema migrations via Alembic add complexity for a 48-hour project
 
-### ❌ Why Not MySQL
+###  Why Not MySQL
 - Same relational constraints as PostgreSQL
 - Weaker JSON support than MongoDB for embedding nested configs
 - No native async Python driver as ergonomic as Motor
 
 ---
 
-## ⚙️ Tech Stack Decisions
+## Tech Stack Decisions
 
 ### Backend: Python + FastAPI
 **Why:** Assignment requirement. FastAPI provides automatic OpenAPI/Swagger docs (`/docs`), Pydantic data validation, and native async support — ideal for a scheduling system.
 
-**Why not Flask:** No built-in async, no auto-generated API docs, more manual work.  
-**Why not Django:** Heavy framework, ORM-centric — overkill for this API.
-
 ### Frontend: React Native (Expo) + NativeWind
 **Why Expo:** Assignment requirement. Write once, run on iOS/Android/Web. `expo export -p web` builds a PWA from the same codebase.  
 **Why NativeWind:** Tailwind CSS utility classes for React Native. Faster styling, consistent design system, same mental model as web Tailwind.  
-**Why not bare React Native:** Expo managed workflow is faster to set up, handles native configs automatically.
 
 ### State Management: Zustand
 **Why:** Ultra-lightweight (~1KB), zero boilerplate, simple `useStore` hook. Perfect for auth state + user data.  
@@ -164,7 +192,7 @@ npx expo export -p web        # Outputs to dist/
 
 ---
 
-## 🔐 Double-Booking Prevention
+## Double-Booking Prevention
 
 ### Strategy: MongoDB Partial Unique Index + DuplicateKeyError catch
 
@@ -196,7 +224,7 @@ except DuplicateKeyError:
 
 ---
 
-## ⏰ Cancellation + Auto-Reallocation Flow
+## Cancellation + Auto-Reallocation Flow
 
 ```
 Patient: DELETE /appointments/{id}
@@ -229,7 +257,7 @@ WebSocket: broadcast to all patients viewing that doctor's calendar
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
@@ -253,7 +281,7 @@ WebSocket: broadcast to all patients viewing that doctor's calendar
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 ```bash
 cd backend
@@ -270,7 +298,7 @@ Tests cover:
 
 ---
 
-## 📱 PWA Installation
+##  PWA Installation
 
 1. Build the web version: `npx expo export -p web`
 2. Serve the `dist/` folder (e.g., `npx serve dist`)
@@ -279,7 +307,7 @@ Tests cover:
 
 ---
 
-## 🔮 Assumptions Made
+##  Assumptions Made
 
 1. **Timezone:** Doctor availability hours are interpreted as IST (UTC+5:30). All times stored in UTC in MongoDB. Frontend displays in user's local time.
 2. **Priority Waitlist:** Urgency levels (critical > high > medium > low) determine reallocation order. Within same urgency, FIFO (oldest request first).
@@ -290,7 +318,7 @@ Tests cover:
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 HospitalManagment/
@@ -321,6 +349,3 @@ HospitalManagment/
     └── public/               ← PWA manifest + service worker
 ```
 
----
-
-*Built with ❤️ for CrestCode Internship | Fake data only*
