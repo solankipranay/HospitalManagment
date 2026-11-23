@@ -287,14 +287,14 @@ async def seed():
 
     print("\n✅ Database seeded successfully!\n")
     print("=" * 55)
-    print("👨‍⚕️  DOCTORS")
+    print(" DOCTORS")
     print("  Dr. John Smith  | dr.smith@hospital.com | General Medicine (15 min)")
     print("  Dr. Priya Patel | dr.patel@hospital.com | Cardiology (45 min)")
-    print("\n🧑‍💼  PATIENTS")
+    print("\n  PATIENTS")
     print("  Alice Johnson   | alice@patient.com")
     print("  Bob Williams    | bob@patient.com")
     print("  Carol Davis     | carol@patient.com")
-    print("\n🔑  All passwords: password123")
+    print("\n  All passwords: password123")
     print("=" * 55)
 
 

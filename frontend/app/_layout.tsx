@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PWAInstallBanner } from "../components/PWAInstallBanner";
+import api from "../services/api";
 
 function RootLayoutNav() {
   const { token, role, isLoading, loadAuth } = useAuthStore();
@@ -15,6 +16,9 @@ function RootLayoutNav() {
 
   useEffect(() => {
     loadAuth();
+
+    // Warm-up ping to wake up cloud backend (e.g. Render free tier cold-start)
+    api.get("/health").catch(() => {});
 
     // PWA Setup for Web: Link manifest and register service worker
     if (Platform.OS === "web" && typeof document !== "undefined") {

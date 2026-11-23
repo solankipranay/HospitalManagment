@@ -5,7 +5,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10_000,
+  timeout: 60_000, // 60 seconds (allows cloud free-tier cold starts like Render to wake up)
   headers: { "Content-Type": "application/json" },
 });
 
@@ -20,10 +20,15 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    const message =
+    let message =
       err.response?.data?.detail ??
       err.message ??
       "Network error. Please try again.";
+
+    if (err.code === "ECONNABORTED" || message.toLowerCase().includes("timeout")) {
+      message = "Server is waking up (free tier cold-start). Please wait a few seconds and try again.";
+    }
+
     return Promise.reject(new Error(message));
   }
 );
